@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Omega Sentinel - Automated Incident Response and Observability for Humans. Slashing emergency arrival metrics from 35 minutes to 9 minutes.">
+    <meta property="og:title" content="Omega Intelligence | Omega Sentinel">
+    <meta property="og:description"
+        content="Automated Incident Response. Low-latency safety grid powered by edge-telemetry.">
+    <meta property="og:type" content="website">
+    <title>Omega Intelligence | Omega Sentinel</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#FACC15',
+                            dark: '#CA8A04',
+                            bg: '#050505',
+                            surface: '#121212',
+                            border: '#262626'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out 3s infinite',
+                        'radar-spin': 'radar-spin 2s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        'radar-spin': {
+                            'from': { transform: 'rotate(0deg)' },
+                            'to': { transform: 'rotate(360deg)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Animated Cyber Grid */
+        .cyber-grid-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -2;
+            background-color: #050505;
+        }
+
+        .cyber-grid {
+            position: absolute;
+            inset: 0;
+            background-size: 50px 50px;
+            background-image:
+                linear-gradient(to right, rgba(38, 38, 38, 0.3) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(38, 38, 38, 0.3) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
+
+        /* Background Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: #FACC15;
+        }
+
+        .orb-2 {
+            bottom: -20%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: rgba(250, 252, 21, 0.5);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(18, 18, 18, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glow-yellow {
+            transition: all 0.4s ease;
+        }
+
+        .glow-yellow:hover {
+            box-shadow: 0 0 40px rgba(250, 252, 21, 0.15);
+            border-color: rgba(250, 252, 21, 0.3);
+            transform: translateY(-5px);
+        }
+
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes pulse-slow {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.95);
+            }
+        }
+
+        .pulse-metric {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+
+        /* Typing cursor for logs */
+        .typing-cursor::after {
+            content: '█';
+            animation: blink 1s step-start infinite;
+            margin-left: 6px;
+            color: #FACC15;
+            font-size: 0.8em;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Radar Effect */
+        .radar-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 1px solid rgba(250, 252, 21, 0.2);
+        }
+
+        .radar-sweep {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 50%;
+            background: linear-gradient(90deg, rgba(250, 252, 21, 0) 0%, rgba(250, 252, 21, 0.4) 100%);
+            transform-origin: 0% 100%;
+            display: none;
+        }
+
+        .radar-active .radar-sweep {
+            display: block;
+            animation: radar-spin 2s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-brand-bg text-neutral-200 font-sans antialiased selection:bg-brand selection:text-black">
+
+    <div class="cyber-grid-container">
+        <div class="cyber-grid"></div>
+    </div>
+    <div class="orb orb-1 animate-float"></div>
+    <div class="orb orb-2 animate-float-delayed"></div>
+
+    <header class="sticky top-0 z-50 glass border-b border-brand-border/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <svg class="w-8 h-8 drop-shadow-[0_0_8px_rgba(250,252,21,0.5)]" viewBox="0 0 100 100" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="35" cy="50" r="30" fill="#FACC15" />
+                    <path d="M72 30L95 19V81H72V30Z" fill="#FACC15" />
+                </svg>
+                <div class="flex flex-col">
+                    <span class="font-bold tracking-tight text-white leading-none">OMEGA</span>
+                    <span class="text-[10px] font-mono tracking-widest text-brand font-medium">INTELLIGENCE</span>
+                </div>
+            </div>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-mono">
+                <a href="#architecture" class="hover:text-brand transition-colors text-neutral-400">Architecture</a>
+                <a href="#dashboard" class="hover:text-brand transition-colors text-neutral-400">Live Engine</a>
+                <a href="#tiers" class="hover:text-brand transition-colors text-neutral-400">Shield Levels</a>
+                <button onclick="toggleInquiryModal()"
+                    class="bg-brand text-black px-5 py-2 font-sans font-bold rounded-md hover:bg-white transition-all shadow-[0_0_15px_rgba(250,252,21,0.3)] hover:shadow-[0_0_25px_rgba(255,255,255,0.5)]">
+                    Inquire Now
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-32">
+
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-6 reveal">
+            <div class="lg:col-span-7 space-y-8">
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand/30 bg-brand/10 text-xs font-mono text-brand backdrop-blur-sm shadow-[0_0_20px_rgba(250,252,21,0.1)]">
+                    <span class="w-2 h-2 rounded-full bg-brand animate-ping"></span>
+                    Omega Sentinel: 9-Minute Incident Remediation
+                </div>
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.05]">
+                    Observability for <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-dark drop-shadow-[0_0_15px_rgba(250,252,21,0.3)]">Humans</span>.
+                    <br>
+                    Automated Rescue.
+                </h1>
+                <p class="text-neutral-400 text-lg max-w-2xl leading-relaxed font-light">
+                    When health emergencies occur at home, generic tools create friction.
+                    <strong class="text-white font-medium">Omega Sentinel</strong> is a low-latency safety grid powered
+                    by
+                    edge-telemetry smartwatches and automated routing infrastructure—slashing emergency arrival metrics
+                    down from <span class="line-through text-neutral-600">35 minutes</span> to an accelerated <strong
+                        class="text-brand font-medium drop-shadow-[0_0_5px_rgba(250,252,21,0.5)]">9 minutes</strong>.
+                </p>
+                <div class="flex flex-wrap gap-4 pt-4">
+                    <a href="#dashboard"
+                        class="bg-brand text-black px-8 py-4 rounded-md font-bold hover:bg-white transition-all duration-300 flex items-center gap-3 shadow-[0_0_20px_rgba(250,252,21,0.2)]">
+                        View Interactive Engine
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </a>
+                    <a href="#architecture"
+                        class="glass hover:bg-white/5 text-white px-8 py-4 rounded-md font-mono text-sm transition-all flex items-center gap-2">
+                        Inspect Primitives
+                    </a>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 grid grid-cols-2 gap-4">
+                <div class="p-6 glass rounded-xl relative overflow-hidden group glow-yellow">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-brand/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <div class="text-xs font-mono text-neutral-500 mb-3 flex items-center gap-2"><i data-lucide="target"
+                            class="w-4 h-4 text-brand"></i> SLA TARGET</div>
+                    <div
+                        class="text-5xl font-extrabold text-brand font-mono tracking-tight drop-shadow-[0_0_10px_rgba(250,252,21,0.3)]">
+                        09<span class="text-lg font-sans text-neutral-400 font-normal">m</span></div>
+                    <p class="text-xs text-neutral-400 mt-3 relative z-10">Guaranteed dispatch window vs 35m industry
+                        avg.</p>
+                </div>
+                <div class="p-6 glass rounded-xl relative overflow-hidden group glow-yellow">
+                    <div class="text-xs font-mono text-neutral-500 mb-3 flex items-center gap-2"><i data-lucide="watch"
+                            class="w-4 h-4 text-neutral-400"></i> TELEMETRY</div>
+                    <div class="text-5xl font-extrabold text-white font-mono tracking-tight">24/7</div>
+                    <p class="text-xs text-neutral-400 mt-3">Continuous monitoring on edge smartwatch builds.</p>
+                </div>
+                <div class="p-6 glass rounded-xl relative overflow-hidden group glow-yellow">
+                    <div class="text-xs font-mono text-neutral-500 mb-3 flex items-center gap-2"><i
+                            data-lucide="activity" class="w-4 h-4 text-neutral-400"></i> UPTIME</div>
+                    <div class="text-5xl font-extrabold text-white font-mono tracking-tight">99.9%</div>
+                    <p class="text-xs text-neutral-400 mt-3">Multi-path communication mesh back to core.</p>
+                </div>
+                <div class="p-6 glass rounded-xl relative overflow-hidden group glow-yellow">
+                    <div class="text-xs font-mono text-neutral-500 mb-3 flex items-center gap-2"><i data-lucide="zap"
+                            class="w-4 h-4 text-brand"></i> REMEDIATION</div>
+                    <div
+                        class="text-5xl font-extrabold text-brand font-mono tracking-tight drop-shadow-[0_0_10px_rgba(250,252,21,0.3)]">
+                        0<span class="text-lg font-sans text-neutral-400 font-normal">Fric</span></div>
+                    <p class="text-xs text-neutral-400 mt-3 relative z-10">Automated orchestration removes human relay.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture" class="space-y-16 reveal">
+            <div class="text-center max-w-3xl mx-auto space-y-4">
+                <div class="inline-flex items-center justify-center p-3 rounded-2xl bg-brand/10 mb-2">
+                    <i data-lucide="cpu" class="w-6 h-6 text-brand"></i>
+                </div>
+                <h2 class="text-4xl font-bold text-white tracking-tight">The Three Sentinel Core Primitives</h2>
+                <p class="text-neutral-400 text-sm font-mono">Behind the intuitive user face runs a highly responsive
+                    event orchestration pipeline.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-8 glass rounded-2xl space-y-5 glow-yellow group">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center text-brand group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(250,252,21,0.2)]">
+                        <i data-lucide="activity-square" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">1. Edge Pulse Analytics</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed">
+                        Acts as an on-wrist health node. Watches for immediate critical anomalies—such as high-impact
+                        kinetic force (falls), voice panic signatures, or extreme heart rate spikes. Functions silently
+                        on edge.
+                    </p>
+                </div>
+
+                <div class="p-8 glass rounded-2xl space-y-5 glow-yellow group">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center text-brand group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(250,252,21,0.2)]">
+                        <i data-lucide="network" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">2. Low-Latency Routing</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed">
+                        A persistent processing core that instantly ingests threshold packets. Leverages automated,
+                        satellite-backed verification engines to identify the point of failure and maps rescue vectors.
+                    </p>
+                </div>
+
+                <div class="p-8 glass rounded-2xl space-y-5 glow-yellow group">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center text-brand group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(250,252,21,0.2)]">
+                        <i data-lucide="siren" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">3. Accelerated Dispatch</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed">
+                        Orchestrates the active response payload. Broadcasts event instructions to local networks and
+                        tracks emergency vehicle routes simultaneously, compressing wait protocols.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="dashboard" class="space-y-10 reveal">
+            <div
+                class="flex flex-col md:flex-row md:items-end justify-between gap-6 glass p-8 rounded-2xl border-brand/20">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 text-brand font-mono text-sm font-bold">
+                        <i data-lucide="terminal" class="w-5 h-5"></i> LIVE ENGINE
+                    </div>
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Simulated Alerting Dashboard</h2>
+                    <p class="text-neutral-400 text-sm max-w-xl">
+                        Simulate an active client-side edge SOS trigger event to watch how packets traverse the Omega
+                        Sentinel state infrastructure in real-time.
+                    </p>
+                </div>
+                <div>
+                    <button id="btn-trigger" onclick="startSimulation()"
+                        class="w-full md:w-auto bg-brand text-black font-bold px-8 py-4 rounded-xl hover:bg-white transition-all flex items-center justify-center gap-3 font-mono text-sm shadow-[0_0_20px_rgba(250,252,21,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]">
+                        <i data-lucide="triangle-alert" class="w-5 h-5 fill-current text-black"></i>
+                        TRIGGER METRIC SOS PACKET
+                    </button>
+                </div>
+            </div>
+
+            <div
+                class="glass border border-brand-border/50 rounded-2xl overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12 font-mono relative">
+
+                <!-- Dashboard Radar Overlay (Subtle background) -->
+                <div
+                    class="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center overflow-hidden">
+                    <div id="radar-bg" class="w-[800px] h-[800px] rounded-full border border-white/20 radar-container">
+                        <div class="radar-sweep"></div>
+                    </div>
+                </div>
+
+                <div
+                    class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-brand-border/50 p-6 space-y-6 bg-black/40 z-10">
+                    <div class="flex items-center justify-between border-b border-brand-border/50 pb-4">
+                        <span class="text-xs font-bold text-neutral-400 tracking-wider">EDGE DEVICE STATUS</span>
+                        <span id="node-badge"
+                            class="px-2.5 py-1 rounded-md text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 font-bold transition-all">
+                            <span
+                                class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_5px_rgba(52,211,153,0.8)]"></span>
+                            STREAMING
+                        </span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-black/60 p-4 border border-white/5 rounded-xl shadow-inner">
+                            <div class="text-[10px] text-neutral-500 mb-2 flex items-center gap-1"><i
+                                    data-lucide="heart-pulse" class="w-3 h-3"></i> BIOMETRIC HEART RATE</div>
+                            <div class="flex items-baseline justify-between">
+                                <div id="val-hr"
+                                    class="text-4xl font-bold text-white transition-all duration-300 font-sans tracking-tight">
+                                    74 <span class="text-xs text-neutral-500 font-normal font-mono">BPM</span></div>
+                                <span id="hr-pulse"
+                                    class="w-3 h-3 rounded-full bg-emerald-500 pulse-metric shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
+                            </div>
+                        </div>
+                        <div class="bg-black/60 p-4 border border-white/5 rounded-xl shadow-inner">
+                            <div class="text-[10px] text-neutral-500 mb-2 flex items-center gap-1"><i
+                                    data-lucide="activity" class="w-3 h-3"></i> OXYGEN SATURATION</div>
+                            <div id="val-g"
+                                class="text-2xl font-bold text-neutral-300 transition-all duration-300 font-sans tracking-tight">
+                                98 <span class="text-xs text-neutral-500 font-normal font-mono">% (Stable)</span>
+                            </div>
+                        </div>
+                        <div class="bg-black/60 p-4 border border-white/5 rounded-xl shadow-inner">
+                            <div class="text-[10px] text-neutral-500 mb-2 flex items-center gap-1"><i data-lucide="mic"
+                                    class="w-3 h-3"></i> AUDIO BUFFER ENGINE</div>
+                            <div id="val-audio" class="text-xs text-neutral-400 transition-all duration-300">STATUS:
+                                <span
+                                    class="text-emerald-400 font-bold drop-shadow-[0_0_5px_rgba(52,211,153,0.3)]">AMBIENT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="lg:col-span-8 p-6 flex flex-col justify-between space-y-6 min-h-[420px] bg-black/80 z-10 relative">
+
+                    <div class="grid grid-cols-4 gap-3 text-center text-[10px] tracking-tight">
+                        <div id="step-1"
+                            class="p-3 border border-white/5 bg-white/5 rounded-lg transition-all duration-500 text-neutral-500 flex flex-col items-center gap-2">
+                            <i data-lucide="scan-line" class="w-5 h-5 mb-1"></i>
+                            <div>EDGE DETECTION</div>
+                        </div>
+                        <div id="step-2"
+                            class="p-3 border border-white/5 bg-white/5 rounded-lg transition-all duration-500 text-neutral-500 flex flex-col items-center gap-2">
+                            <i data-lucide="server" class="w-5 h-5 mb-1"></i>
+                            <div>CORE INGESTION</div>
+                        </div>
+                        <div id="step-3"
+                            class="p-3 border border-white/5 bg-white/5 rounded-lg transition-all duration-500 text-neutral-500 flex flex-col items-center gap-2">
+                            <i data-lucide="route" class="w-5 h-5 mb-1"></i>
+                            <div>MESH ROUTING</div>
+                        </div>
+                        <div id="step-4"
+                            class="p-3 border border-white/5 bg-white/5 rounded-lg transition-all duration-500 text-neutral-500 flex flex-col items-center gap-2">
+                            <i data-lucide="ambulance" class="w-5 h-5 mb-1"></i>
+                            <div>DISPATCH EN-ROUTE</div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 bg-[#0a0a0a] border border-white/10 rounded-xl p-5 overflow-y-auto text-xs font-mono space-y-2 text-neutral-400 shadow-inner min-h-[200px]"
+                        id="terminal-logs">
+                        <div class="text-neutral-600"><span class="text-neutral-700">[SYSTEM]</span> Initialization
+                            sequence clear. Monitoring telemetry endpoints...</div>
+                        <div class="text-neutral-600"><span class="text-neutral-700">[EDGE]</span> Watch Node id_8452
+                            running state loop checking thresholds.</div>
+                        <div id="typing-line" class="text-brand typing-cursor mt-2 hidden"></div>
+                    </div>
+
+                    <div
+                        class="flex items-center justify-between pt-5 border-t border-brand-border/50 text-xs text-neutral-500 font-bold">
+                        <div class="flex items-center gap-2"><i data-lucide="timer" class="w-4 h-4"></i> SLA TIMER
+                            RESOLUTION:</div>
+                        <div id="sla-counter"
+                            class="text-neutral-400 text-lg font-mono bg-black/50 px-3 py-1 rounded border border-white/5">
+                            --:--</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="tiers" class="space-y-10 reveal">
+            <div class="text-center max-w-3xl mx-auto space-y-4">
+                <div class="inline-flex items-center justify-center p-3 rounded-2xl bg-brand/10 mb-2">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-brand"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white tracking-tight">Select Infrastructure Protection Levels</h2>
+                <p class="text-neutral-400 text-sm font-mono">Tailor security limits according to your system protection
+                    parameters.</p>
+            </div>
+
+            <div class="overflow-x-auto glass rounded-2xl shadow-2xl border-brand-border/50">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="border-b border-brand-border/50 bg-black/40 font-mono text-xs text-neutral-400">
+                            <th class="p-5 font-semibold">SHIELD TYPE</th>
+                            <th class="p-5 font-semibold">INFRASTRUCTURE PAYLOAD SPEC</th>
+                            <th class="p-5 font-semibold text-right">RESPONSE SLA LEVEL</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-brand-border/30 text-sm">
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-5 font-bold text-white flex items-center gap-2"><i data-lucide="shield"
+                                    class="w-4 h-4 text-neutral-400"></i> Omega Pulse</td>
+                            <td class="p-5 text-neutral-400">Smartwatch Telemetry Engine + Dynamic Real-Time Alerts
+                                routed instantly to localized Parental Notification endpoints.</td>
+                            <td class="p-5 text-right font-mono text-brand font-medium">Standard Grid</td>
+                        </tr>
+                        <tr class="hover:bg-brand/5 transition-colors bg-brand/5 relative overflow-hidden">
+                            <td class="p-5 font-bold text-white flex items-center gap-2">
+                                <i data-lucide="shield-alert" class="w-4 h-4 text-brand"></i> Omega Aegis
+                                <span
+                                    class="bg-brand text-black text-[10px] font-mono font-bold px-2 py-0.5 rounded shadow-[0_0_10px_rgba(250,252,21,0.4)]">RECOMMENDED</span>
+                            </td>
+                            <td class="p-5 text-neutral-300 font-medium">Includes total Pulse payload layer features +
+                                automated dedicated Emergency Vehicle dispatch integration pipelines.</td>
+                            <td
+                                class="p-5 text-right font-mono text-brand font-bold drop-shadow-[0_0_5px_rgba(250,252,21,0.5)]">
+                                &lt; 9 Min Ambulance</td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-5 font-bold text-white flex items-center gap-2"><i data-lucide="shield-ban"
+                                    class="w-4 h-4 text-neutral-500"></i> Omega Black</td>
+                            <td class="p-5 text-neutral-400">Full Premium Emergency Team activation + localized network
+                                triggers + advance telemetry pre-clearance with standby centers.</td>
+                            <td class="p-5 text-right font-mono text-brand font-medium">Priority Pipeline</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-brand-border/50 bg-black mt-24">
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-500">
+            <div class="flex items-center gap-2"><i data-lucide="fingerprint" class="w-4 h-4"></i> &copy; 2026 Omega
+                Intelligence. Indian Startup 💛 Safety Architecture.</div>
+            <div class="flex items-center gap-6">
+                <a href="https://www.linkedin.com/company/omegaintelligence-in" target="_blank"
+                    class="hover:text-brand transition-colors text-neutral-400 flex items-center gap-1.5"><i
+                        data-lucide="linkedin" class="w-4 h-4"></i>LinkedIn</a>
+                <a href="https://omegaintelligence.in/" target="_blank"
+                    class="hover:text-brand transition-colors text-neutral-400 flex items-center gap-1.5"><i
+                        data-lucide="external-link" class="w-4 h-4"></i>omegaintelligence.in</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Inquiry Modal -->
+    <div id="inquiry-modal"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass p-8 rounded-2xl w-full max-w-md border border-brand/30 shadow-[0_0_30px_rgba(250,252,21,0.15)] relative transform scale-95 transition-transform duration-300"
+            id="inquiry-content">
+            <button onclick="toggleInquiryModal()" class="absolute top-4 right-4 text-neutral-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-2xl font-bold text-white mb-2 tracking-tight">Request Deployment</h3>
+            <p class="text-sm text-neutral-400 font-mono mb-6">Initiate secure contact protocol with Omega Sentinel.</p>
+
+            <form action="mailto:mail@example.com" method="post" enctype="text/plain" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-mono text-neutral-500 mb-1">IDENTIFICATION (NAME)</label>
+                    <input type="text" name="name" required
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand/50 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-neutral-500 mb-1">COMMS NODE (EMAIL)</label>
+                    <input type="email" name="email" required
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand/50 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-neutral-500 mb-1">PAYLOAD (MESSAGE)</label>
+                    <textarea name="message" rows="4" required
+                        class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand/50 transition-colors"></textarea>
+                </div>
+                <button type="submit"
+                    class="w-full bg-brand text-black font-bold px-4 py-3 rounded-xl hover:bg-white transition-all shadow-[0_0_15px_rgba(250,252,21,0.2)] flex items-center justify-center gap-2 mt-4">
+                    <i data-lucide="send" class="w-4 h-4"></i> TRANSMIT SECURE
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal Logic
+        function toggleInquiryModal() {
+            const modal = document.getElementById('inquiry-modal');
+            const content = document.getElementById('inquiry-content');
+
+            if (modal.classList.contains('opacity-0')) {
+                // Open
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            } else {
+                // Close
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+            }
+        }
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Scroll Reveal Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const reveals = document.querySelectorAll('.reveal');
+            const revealOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
+
+            const revealOnScroll = new IntersectionObserver(function (entries, observer) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, revealOptions);
+
+            reveals.forEach(reveal => revealOnScroll.observe(reveal));
+
+            // Trigger first ones immediately if visible
+            setTimeout(() => {
+                reveals.forEach(reveal => {
+                    const windowHeight = window.innerHeight;
+                    const elementTop = reveal.getBoundingClientRect().top;
+                    if (elementTop < windowHeight - 50) reveal.classList.add('active');
+                });
+            }, 100);
+        });
+
+        // Simulation Logic
+        let isRunning = false;
+        let logQueue = [];
+        let isTyping = false;
+        let globalTimerInterval = null;
+
+        function appendLog(text, type = 'info') {
+            logQueue.push({ text, type });
+            processLogQueue();
+        }
+
+        function processLogQueue() {
+            if (isTyping || logQueue.length === 0) return;
+
+            isTyping = true;
+            const { text, type } = logQueue.shift();
+            const container = document.getElementById('terminal-logs');
+            const typingLine = document.getElementById('typing-line');
+
+            typingLine.classList.remove('hidden');
+            typingLine.textContent = '';
+
+            let colorClass = 'text-neutral-400';
+            if (type === 'warn') colorClass = 'text-amber-400 font-medium';
+            if (type === 'crit') colorClass = 'text-rose-500 font-bold drop-shadow-[0_0_5px_rgba(244,63,94,0.5)]';
+            if (type === 'success') colorClass = 'text-brand font-bold drop-shadow-[0_0_5px_rgba(250,252,21,0.5)]';
+
+            const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            typingLine.className = `${colorClass} typing-cursor mt-1`;
+
+            const prefix = `<span class="text-neutral-600 font-normal">[${time}]</span> `;
+
+            let i = 0;
+            const typeChar = () => {
+                if (i < text.length) {
+                    typingLine.innerHTML = prefix + text.substring(0, i + 1);
+                    i++;
+                    container.scrollTop = container.scrollHeight;
+                    // Faster typing for critical logs
+                    setTimeout(typeChar, type === 'crit' ? 10 : 25);
+                } else {
+                    // Finished typing line
+                    const log = document.createElement('div');
+                    log.className = `${colorClass} mb-1`;
+                    log.innerHTML = prefix + text;
+                    container.insertBefore(log, typingLine);
+                    typingLine.classList.add('hidden');
+                    isTyping = false;
+                    processLogQueue();
+                }
+            };
+            typeChar();
+        }
+
+        function setStepActive(stepId, isActive, isSuccess = false) {
+            const el = document.getElementById(stepId);
+            if (!el) return;
+
+            // Base classes that don't change
+            const baseClasses = 'p-3 rounded-lg transition-all duration-500 flex flex-col items-center gap-2 border';
+
+            if (isActive) {
+                el.className = `${baseClasses} border-brand bg-brand/20 text-brand shadow-[0_0_20px_rgba(250,252,21,0.2)] font-bold scale-105 transform`;
+            } else if (isSuccess) {
+                el.className = `${baseClasses} border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.1)]`;
+            } else {
+                el.className = `${baseClasses} border-white/5 bg-white/5 text-neutral-500`;
+            }
+        }
+
+        function animateValue(obj, start, end, duration, suffix = "", prefix = "") {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Ease out cubic
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const current = (progress === 1) ? end : start + (end - start) * easeProgress;
+
+                // Format depending on decimal presence
+                const formatted = end % 1 !== 0 ? current.toFixed(2) : Math.floor(current);
+                obj.innerHTML = `${formatted} ${suffix}`;
+
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function startSimulation() {
+            if (isRunning) return;
+            isRunning = true;
+
+            const btn = document.getElementById('btn-trigger');
+            const badge = document.getElementById('node-badge');
+            const hrVal = document.getElementById('val-hr');
+            const hrPulse = document.getElementById('hr-pulse');
+            const gVal = document.getElementById('val-g');
+            const audioVal = document.getElementById('val-audio');
+            const timerVal = document.getElementById('sla-counter');
+            const radarBg = document.getElementById('radar-bg');
+
+            // Clear previous logs and state cleanly
+            document.getElementById('terminal-logs').innerHTML = `<div id="typing-line" class="text-brand typing-cursor mt-2 hidden"></div>`;
+            logQueue = [];
+            isTyping = false;
+
+            // UI Lockdown
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> PACKET EN-ROUTE`;
+            btn.className = "w-full md:w-auto bg-neutral-800 text-neutral-500 font-bold px-8 py-4 rounded-xl cursor-not-allowed font-mono text-sm border border-white/10 flex items-center justify-center gap-3";
+            lucide.createIcons();
+
+            // Enable Radar Effect
+            radarBg.classList.add('radar-active');
+            radarBg.classList.add('border-brand/40');
+
+            // Reset Steps
+            setStepActive('step-1', true);
+            setStepActive('step-2', false);
+            setStepActive('step-3', false);
+            setStepActive('step-4', false);
+
+            // Edge Status Update
+            badge.className = "px-2.5 py-1 rounded-md text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/50 flex items-center gap-1.5 font-bold shadow-[0_0_10px_rgba(244,63,94,0.4)]";
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> SOS INCIDENT`;
+
+            // Animate Metrics
+            hrVal.className = "text-4xl font-bold text-rose-500 tracking-tight transition-all duration-300 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]";
+            animateValue(hrVal, 74, 142, 800, `<span class="text-xs text-rose-500/80 font-normal font-mono uppercase tracking-wider block mt-1">BPM [CRITICAL]</span>`);
+            hrPulse.className = "w-3 h-3 rounded-full bg-rose-500 animate-ping shadow-[0_0_15px_rgba(244,63,94,1)]";
+
+            gVal.className = "text-2xl font-bold text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]";
+            animateValue(gVal, 98, 86, 600, `<span class="text-xs text-amber-500/80 font-normal font-mono block mt-1">% [HYPOXIA]</span>`);
+
+            audioVal.innerHTML = `STATUS: <span class="text-rose-500 font-bold drop-shadow-[0_0_5px_rgba(244,63,94,0.5)]">TRIGGER ("HELP")</span>`;
+
+            // Logs
+            appendLog('--- SIMULATION INITIATED ---', 'warn');
+            appendLog('Blood Oxygen anomaly detected on edge watch node.', 'warn');
+            appendLog('Acoustic keyword extraction matched audio payload: "HELP!".', 'warn');
+            appendLog('Emitting high-priority binary telemetry packet via satellite relays...', 'crit');
+
+            // Timer Logic
+            let remainingSecs = 540; // 9 minutes
+            timerVal.className = "text-rose-400 text-lg font-mono bg-rose-500/10 px-3 py-1 rounded border border-rose-500/30 font-bold shadow-[0_0_10px_rgba(244,63,94,0.2)]";
+            timerVal.innerHTML = `09:00 <span class="text-xs">rem</span>`;
+
+            if (globalTimerInterval) clearInterval(globalTimerInterval);
+
+            globalTimerInterval = setInterval(() => {
+                if (remainingSecs <= 0 || !isRunning) {
+                    clearInterval(globalTimerInterval);
+                    timerVal.innerHTML = `00:00 <span class="text-xs">[SLA MET]</span>`;
+                    timerVal.className = "text-emerald-400 text-lg font-mono bg-emerald-500/10 px-3 py-1 rounded border border-emerald-500/30 font-bold shadow-[0_0_10px_rgba(52,211,153,0.2)] flex items-center gap-2";
+                    return;
+                }
+                let m = Math.floor(remainingSecs / 60);
+                let s = Math.floor(remainingSecs % 60);
+                timerVal.innerHTML = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} <span class="text-xs">rem</span>`;
+
+                // Accelerate time faster but prevent negative. 6.5s per tick means ~8.3s real time to reach 0.
+                remainingSecs = Math.max(0, remainingSecs - 6.5);
+            }, 100);
+
+            // Step Sequence
+            setTimeout(() => {
+                setStepActive('step-1', false, true);
+                setStepActive('step-2', true);
+                appendLog('Packet received at Core Platform Ingestion engine.', 'success');
+                appendLog('Bypassing low-priority false-positive heuristics filter.', 'info');
+            }, 2000);
+
+            setTimeout(() => {
+                setStepActive('step-2', false, true);
+                setStepActive('step-3', true);
+                appendLog('Spatial Index calculation complete. Node Coordinates mapped.', 'info');
+                appendLog('Nearest responsive human network array element matched.', 'success');
+            }, 4500);
+
+            setTimeout(() => {
+                setStepActive('step-3', false, true);
+                setStepActive('step-4', true);
+                appendLog('Context instructions successfully orchestrated to emergency targets.', 'success');
+                appendLog('Omega Aegis Protocol fully engaged: Emergency vehicle dispatched.', 'crit');
+            }, 6500);
+
+            setTimeout(() => {
+                setStepActive('step-4', false, true);
+                appendLog('--- SIMULATION COMPLETED: ACTIVE PROTECTION DEPLOYED ---', 'success');
+                radarBg.classList.remove('radar-active');
+
+                // Re-enable button but leave state visible
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="triangle-alert" class="w-5 h-5 fill-current text-black"></i> RE-TRIGGER SIMULATION`;
+                btn.className = "w-full md:w-auto bg-brand text-black font-bold px-8 py-4 rounded-xl hover:bg-white transition-all flex items-center justify-center gap-3 font-mono text-sm shadow-[0_0_20px_rgba(250,252,21,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]";
+                lucide.createIcons();
+
+                isRunning = false;
+            }, 8500);
+        }
+    </script>
+</body>
+
+</html>
